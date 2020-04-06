@@ -34,7 +34,7 @@ export const execPrReviewRequestedMention = async (
   githubClient: typeof GithubRepositoryImpl,
   slackClient: typeof SlackRepositoryImpl
 ) => {
-  const requestedGithubUsername = payload.requested_reviewer.login;
+  const requestedGithubUsername = payload.requested_reviewer?.login || "";
   const slackIds = await convertToSlackUsername(
     [requestedGithubUsername],
     githubClient,
