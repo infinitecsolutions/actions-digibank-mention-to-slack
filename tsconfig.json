@@ -22,7 +22,7 @@
     "strictPropertyInitialization": true,
     "alwaysStrict": true,
     "noFallthroughCasesInSwitch": true,
-    "outDir": "dist"
+    "outDir": "dist",
   },
   "files": ["src/index.ts"]
 }

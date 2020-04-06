@@ -10,8 +10,6 @@ import {
 import { buildSlackPostMessage, SlackRepositoryImpl } from "./modules/slack";
 
 export type AllInputs = {
-  repoToken: string;
-  configurationPath: string;
   slackWebhookUrl: string;
   iconUrl?: string;
   botName?: string;
@@ -19,14 +17,9 @@ export type AllInputs = {
 
 export const convertToSlackUsername = async (
   githubUsernames: string[],
-  githubClient: typeof GithubRepositoryImpl,
-  repoToken: string,
-  configurationPath: string
+  githubClient: typeof GithubRepositoryImpl
 ): Promise<string[]> => {
-  const mapping = await githubClient.loadNameMappingConfig(
-    repoToken,
-    configurationPath
-  );
+  const mapping = await githubClient.loadNameMappingConfig();
 
   const slackIds = githubUsernames
     .map(githubUsername => mapping[githubUsername])
@@ -41,13 +34,10 @@ export const execPrReviewRequestedMention = async (
   githubClient: typeof GithubRepositoryImpl,
   slackClient: typeof SlackRepositoryImpl
 ) => {
-  const { repoToken, configurationPath } = allInputs;
   const requestedGithubUsername = payload.requested_reviewer.login;
   const slackIds = await convertToSlackUsername(
     [requestedGithubUsername],
     githubClient,
-    repoToken,
-    configurationPath
   );
 
   if (slackIds.length === 0) {
@@ -78,12 +68,9 @@ export const execNormalMention = async (
     return;
   }
 
-  const { repoToken, configurationPath } = allInputs;
   const slackIds = await convertToSlackUsername(
     githubUsernames,
     githubClient,
-    repoToken,
-    configurationPath
   );
 
   const message = buildSlackPostMessage(
@@ -108,20 +95,10 @@ const getAllInputs = (): AllInputs => {
     core.setFailed("Error! Need to set `slack-webhook-url`.");
   }
 
-  const repoToken = core.getInput("repo-token", { required: true });
-  if (!repoToken) {
-    core.setFailed("Error! Need to set `repo-token`.");
-  }
-
   const iconUrl = core.getInput("icon-url", { required: false });
   const botName = core.getInput("bot-name", { required: false });
-  const configurationPath = core.getInput("configuration-path", {
-    required: true
-  });
 
   return {
-    repoToken,
-    configurationPath,
     slackWebhookUrl,
     iconUrl,
     botName

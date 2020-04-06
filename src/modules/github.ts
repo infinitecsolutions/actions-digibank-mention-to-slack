@@ -1,6 +1,4 @@
-import * as github from "@actions/github";
 import { WebhookPayload } from "@actions/github/lib/interfaces";
-import * as yaml from "js-yaml";
 
 export const pickupUsername = (text: string) => {
   const pattern = /\B@[a-z0-9_-]+/gi;
@@ -73,36 +71,13 @@ export const pickupInfoFromGithubPayload = (
   );
 };
 
-const fetchContent = async (
-  client: github.GitHub,
-  repoPath: string
-): Promise<string> => {
-  const response: any = await client.repos.getContents({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    path: repoPath,
-    ref: github.context.sha
-  });
-
-  return Buffer.from(response.data.content, response.data.encoding).toString();
-};
-
 type MappingFile = {
-  [githugUsername: string]: string | undefined;
+  [githubUsername: string]: string | undefined;
 };
 
 export const GithubRepositoryImpl = {
-  loadNameMappingConfig: async (
-    repoToken: string,
-    configurationPath: string
-  ) => {
-    const githubClient = new github.GitHub(repoToken);
-    const configurationContent = await fetchContent(
-      githubClient,
-      configurationPath
-    );
-
-    const configObject: MappingFile = yaml.safeLoad(configurationContent);
+  loadNameMappingConfig: () => {
+    const configObject: MappingFile = require("../../user-mapping.json")
     return configObject;
   }
 };
