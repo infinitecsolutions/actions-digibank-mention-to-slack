@@ -1,8 +1,8 @@
 {
-  "name": "actions-mention-to-slack",
-  "version": "1.0.0",
+  "name": "actions-digibank-mention-to-slack",
   "description": "",
-  "main": "src/index.ts",
+  "version": "2.0.0",
+  "author": "",
   "dependencies": {
     "@actions/core": "^1.2.3",
     "@actions/github": "^2.1.1",
@@ -18,18 +18,16 @@
     "ts-node": "^8.8.1",
     "typescript": "^3.8.3"
   },
-  "scripts": {
-    "test": "jest",
-    "build": "ncc build"
-  },
+  "homepage": "https://github.com/infinitecsolutions/actions-digibank-mention-to-slack#readme",
+  "license": "ISC",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abeyuya/actions-mention-to-slack.git"
+    "url": "git+https://github.com/infinitecsolutions/actions-digibank-mention-to-slack.git"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/abeyuya/actions-mention-to-slack/issues"
-  },
-  "homepage": "https://github.com/abeyuya/actions-mention-to-slack#readme"
+  "scripts": {
+    "build": "ncc build",
+    "prepublish": "npm run -s build",
+    "test": "jest"
+  }
 }
