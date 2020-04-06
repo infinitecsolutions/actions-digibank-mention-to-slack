@@ -5683,16 +5683,16 @@ exports.convertToSlackUsername = async (githubUsernames, githubClient) => {
     return slackIds;
 };
 exports.execPrReviewRequestedMention = async (payload, allInputs, githubClient, slackClient) => {
-    var _a, _b, _c;
-    const requestedGithubUsername = payload.requested_reviewer.login;
+    var _a, _b, _c, _d;
+    const requestedGithubUsername = ((_a = payload.requested_reviewer) === null || _a === void 0 ? void 0 : _a.login) || "";
     const slackIds = await exports.convertToSlackUsername([requestedGithubUsername], githubClient);
     if (slackIds.length === 0) {
         return;
     }
-    const title = (_a = payload.pull_request) === null || _a === void 0 ? void 0 : _a.title;
-    const url = (_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.html_url;
+    const title = (_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.title;
+    const url = (_c = payload.pull_request) === null || _c === void 0 ? void 0 : _c.html_url;
     const requestedSlackUserId = slackIds[0];
-    const requestUsername = (_c = payload.sender) === null || _c === void 0 ? void 0 : _c.login;
+    const requestUsername = (_d = payload.sender) === null || _d === void 0 ? void 0 : _d.login;
     const message = `<@${requestedSlackUserId}> has been requested to review <${url}|${title}> by ${requestUsername}.`;
     const { slackWebhookUrl, iconUrl, botName } = allInputs;
     await slackClient.postToSlack(slackWebhookUrl, message, { iconUrl, botName });
