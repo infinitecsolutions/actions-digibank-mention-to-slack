@@ -5673,6 +5673,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const github = __importStar(__webpack_require__(469));
+const { version } = __webpack_require__(731);
 const github_1 = __webpack_require__(559);
 const slack_1 = __webpack_require__(970);
 exports.convertToSlackUsername = async (githubUsernames, githubClient) => {
@@ -5724,6 +5725,7 @@ const getAllInputs = () => {
     };
 };
 const main = async () => {
+    console.log(`Running mention-to-slack version ${version}`);
     const { payload } = github.context;
     try {
         const allInputs = getAllInputs();
@@ -5734,6 +5736,7 @@ const main = async () => {
         await exports.execNormalMention(payload, allInputs, github_1.GithubRepositoryImpl, slack_1.SlackRepositoryImpl);
     }
     catch (error) {
+        console.error(error);
         core.setFailed(error.message);
     }
 };
@@ -11235,6 +11238,13 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
+
+/***/ }),
+
+/***/ 731:
+/***/ (function(module) {
+
+module.exports = {"name":"actions-digibank-mention-to-slack","description":"","version":"3.0.2","author":"","dependencies":{"@actions/core":"^1.2.3","@actions/github":"^2.1.1","axios":"^0.19.2"},"devDependencies":{"@types/jest":"^25.1.4","@types/js-yaml":"^3.12.2","@zeit/ncc":"^0.22.0","jest":"^25.2.3","ts-jest":"^25.2.1","ts-node":"^8.8.1","typescript":"^3.8.3"},"homepage":"https://github.com/infinitecsolutions/actions-digibank-mention-to-slack#readme","license":"ISC","main":"src/index.ts","repository":{"type":"git","url":"git+https://github.com/infinitecsolutions/actions-digibank-mention-to-slack.git"},"scripts":{"build":"ncc build","preversion":"npm run -s build && git add dist","test":"jest"}};
 
 /***/ }),
 
@@ -28708,7 +28718,7 @@ exports.buildSlackPostMessage = (slackIdsForMention, issueTitle, commentLink, gi
         body
     ].join("\n");
 };
-const defaultBotName = "Github Mention To Slack";
+const defaultBotName = "Github Mention";
 exports.SlackRepositoryImpl = {
     postToSlack: async (webhookUrl, message, options) => {
         const botName = (() => {
