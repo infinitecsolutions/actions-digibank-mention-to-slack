@@ -12,32 +12,13 @@ This action sends mention to your slack account when you have been mentioned at 
 
 ## Example usage
 
-.github/workflows/mention-to-slack.yml
+Create a file named `.github/workflows/mention-to-slack.yml`.
+Copy the content of `mention-to-slack.template.yml`.
 
-```yml
-on:
-  issues:
-    types: [opened]
-  issue_comment:
-    types: [created]
-  pull_request:
-    types: [opened, review_requested]
-  pull_request_review:
-    types: [submitted]
-  pull_request_review_comment:
-    types: [created]
 
-jobs:
-  mention-to-slack:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run
-        uses: abeyuya/actions-mention-to-slack@v3.0.0
-        with:
-          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-```
+## Update User Mapping
 
-user-mapping.json
+Send a PR for `user-mapping.json`
 
 ```json
 {
