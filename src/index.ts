@@ -2,6 +2,8 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { WebhookPayload } from "@actions/github/lib/interfaces";
 
+const {version} = require('../package.json')
+
 import {
   pickupUsername,
   pickupInfoFromGithubPayload,
@@ -106,6 +108,8 @@ const getAllInputs = (): AllInputs => {
 };
 
 const main = async () => {
+  console.log(`Running mention-to-slack version ${version}`)
+
   const { payload } = github.context;
 
   try {
@@ -128,6 +132,7 @@ const main = async () => {
       SlackRepositoryImpl
     );
   } catch (error) {
+    console.error(error)
     core.setFailed(error.message);
   }
 };

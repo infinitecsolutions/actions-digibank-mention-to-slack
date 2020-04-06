@@ -32,7 +32,7 @@ type SlackPostParam = {
   icon_emoji?: string;
 };
 
-const defaultBotName = "Github Mention To Slack";
+const defaultBotName = "Github Mention";
 
 export const SlackRepositoryImpl = {
   postToSlack: async (
