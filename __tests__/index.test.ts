@@ -14,14 +14,12 @@ describe("src/index", () => {
 
     it("should return hits slack member ids", async () => {
       const mock = {
-        loadNameMappingConfig: jest.fn(async () => mapping)
+        loadNameMappingConfig: jest.fn(() => mapping)
       };
 
       const result = await convertToSlackUsername(
         ["github_user_1", "github_user_2"],
         mock,
-        "",
-        ""
       );
 
       expect(result).toEqual(["slack_user_1", "slack_user_2"]);
@@ -29,14 +27,12 @@ describe("src/index", () => {
 
     it("should return empty when no listed github_user", async () => {
       const mock = {
-        loadNameMappingConfig: jest.fn(async () => mapping)
+        loadNameMappingConfig: jest.fn(() => mapping)
       };
 
       const result = await convertToSlackUsername(
         ["github_user_not_listed"],
         mock,
-        "",
-        ""
       );
 
       expect(result).toEqual([]);
@@ -45,8 +41,6 @@ describe("src/index", () => {
 
   describe("execPrReviewRequestedMention", () => {
     const dummyInputs: AllInputs = {
-      repoToken: "",
-      configurationPath: "",
       slackWebhookUrl: "dummy_url",
       iconUrl: "",
       botName: ""
@@ -58,7 +52,7 @@ describe("src/index", () => {
 
     it("should call postToSlack if requested_user is listed in mapping", async () => {
       const githubMock = {
-        loadNameMappingConfig: jest.fn(async () => dummyMapping)
+        loadNameMappingConfig: jest.fn(() => dummyMapping)
       };
 
       const slackMock = {
@@ -96,7 +90,7 @@ describe("src/index", () => {
 
     it("should not call postToSlack if requested_user is not listed in mapping", async () => {
       const githubMock = {
-        loadNameMappingConfig: jest.fn(async () => dummyMapping)
+        loadNameMappingConfig: jest.fn(() => dummyMapping)
       };
 
       const slackMock = {
@@ -130,8 +124,6 @@ describe("src/index", () => {
 
   describe("execNormalMention", () => {
     const dummyInputs: AllInputs = {
-      repoToken: "",
-      configurationPath: "",
       slackWebhookUrl: "dummy_url",
       iconUrl: "",
       botName: ""
@@ -143,7 +135,7 @@ describe("src/index", () => {
 
     it("should call postToSlack if requested_user is listed in mapping", async () => {
       const githubMock = {
-        loadNameMappingConfig: jest.fn(async () => dummyMapping)
+        loadNameMappingConfig: jest.fn(() => dummyMapping)
       };
 
       const slackMock = {
