@@ -17,6 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run
-        uses: infinitecsolutions/actions-digibank-mention-to-slack@v3.0.1
+        uses: infinitecsolutions/actions-digibank-mention-to-slack@v3
         with:
           slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}

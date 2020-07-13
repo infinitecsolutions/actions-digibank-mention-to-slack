@@ -2252,6 +2252,111 @@ module.exports = require("child_process");
 
 /***/ }),
 
+/***/ 131:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const core = __importStar(__webpack_require__(470));
+const github_1 = __webpack_require__(469);
+const { version } = __webpack_require__(731);
+const github_2 = __webpack_require__(559);
+const slack_1 = __webpack_require__(970);
+exports.convertToSlackUsername = async (githubUsernames, githubClient) => {
+    const mapping = await githubClient.loadNameMappingConfig();
+    const slackIds = githubUsernames
+        .map((githubUsername) => mapping[githubUsername])
+        .filter((slackId) => slackId !== undefined);
+    return slackIds;
+};
+exports.execPrReviewRequestedMention = async (payload, allInputs, githubClient, slackClient) => {
+    var _a, _b, _c, _d;
+    const requestedGithubUsername = ((_a = payload.requested_reviewer) === null || _a === void 0 ? void 0 : _a.login) || "";
+    const slackIds = await exports.convertToSlackUsername([requestedGithubUsername], githubClient);
+    if (slackIds.length === 0) {
+        return;
+    }
+    const title = (_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.title;
+    const url = (_c = payload.pull_request) === null || _c === void 0 ? void 0 : _c.html_url;
+    const requestedSlackUserId = slackIds[0];
+    const requestUsername = (_d = payload.sender) === null || _d === void 0 ? void 0 : _d.login;
+    const message = `<@${requestedSlackUserId}> has been requested to review <${url}|${title}> by ${requestUsername}.`;
+    const { slackWebhookUrl, iconUrl, botName } = allInputs;
+    await slackClient.postToSlack(slackWebhookUrl, message, { iconUrl, botName });
+};
+exports.execNormalMention = async (payload, allInputs, githubClient, slackClient) => {
+    const info = github_2.pickupInfoFromGithubPayload(payload);
+    if (info.body === null) {
+        return;
+    }
+    const githubUsernames = github_2.pickupUsername(info.body);
+    if (githubUsernames.length === 0) {
+        return;
+    }
+    const slackIds = await exports.convertToSlackUsername(githubUsernames, githubClient);
+    if (slackIds.length === 0) {
+        return;
+    }
+    const message = slack_1.buildSlackPostMessage(slackIds, info.title, info.url, info.body, info.senderName);
+    const { slackWebhookUrl, iconUrl, botName } = allInputs;
+    await slackClient.postToSlack(slackWebhookUrl, message, { iconUrl, botName });
+};
+const buildCurrentJobUrl = (runId) => {
+    const { owner, repo } = github_1.context.repo;
+    return `https://github.com/${owner}/${repo}/runs/${runId}`;
+};
+exports.execPostError = async (error, allInputs, slackClient) => {
+    const { runId } = allInputs;
+    const currentJobUrl = runId ? buildCurrentJobUrl(runId) : undefined;
+    const message = slack_1.buildSlackErrorMessage(error, currentJobUrl);
+    core.warning(message);
+    const { slackWebhookUrl, iconUrl, botName } = allInputs;
+    await slackClient.postToSlack(slackWebhookUrl, message, { iconUrl, botName });
+};
+const getAllInputs = () => {
+    const slackWebhookUrl = core.getInput("slack-webhook-url", {
+        required: true,
+    });
+    if (!slackWebhookUrl) {
+        core.setFailed("Error! Need to set `slack-webhook-url`.");
+    }
+    const iconUrl = core.getInput("icon-url", { required: false });
+    const botName = core.getInput("bot-name", { required: false });
+    const runId = core.getInput("run-id", { required: false }) || process.env.GITHUB_RUN_ID;
+    return {
+        slackWebhookUrl,
+        iconUrl,
+        botName,
+        runId,
+    };
+};
+exports.main = async () => {
+    console.log(`Running mention-to-slack version ${version}`);
+    const { payload } = github_1.context;
+    const allInputs = getAllInputs();
+    try {
+        if (payload.action === "review_requested") {
+            await exports.execPrReviewRequestedMention(payload, allInputs, github_2.GithubRepositoryImpl, slack_1.SlackRepositoryImpl);
+            return;
+        }
+        await exports.execNormalMention(payload, allInputs, github_2.GithubRepositoryImpl, slack_1.SlackRepositoryImpl);
+    }
+    catch (error) {
+        await exports.execPostError(error, allInputs, slack_1.SlackRepositoryImpl);
+    }
+};
+
+
+/***/ }),
+
 /***/ 133:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -5663,84 +5768,9 @@ isStream.transform = function (stream) {
 
 "use strict";
 
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const core = __importStar(__webpack_require__(470));
-const github = __importStar(__webpack_require__(469));
-const { version } = __webpack_require__(731);
-const github_1 = __webpack_require__(559);
-const slack_1 = __webpack_require__(970);
-exports.convertToSlackUsername = async (githubUsernames, githubClient) => {
-    const mapping = await githubClient.loadNameMappingConfig();
-    const slackIds = githubUsernames
-        .map(githubUsername => mapping[githubUsername])
-        .filter(slackId => slackId !== undefined);
-    return slackIds;
-};
-exports.execPrReviewRequestedMention = async (payload, allInputs, githubClient, slackClient) => {
-    var _a, _b, _c, _d;
-    const requestedGithubUsername = ((_a = payload.requested_reviewer) === null || _a === void 0 ? void 0 : _a.login) || "";
-    const slackIds = await exports.convertToSlackUsername([requestedGithubUsername], githubClient);
-    if (slackIds.length === 0) {
-        return;
-    }
-    const title = (_b = payload.pull_request) === null || _b === void 0 ? void 0 : _b.title;
-    const url = (_c = payload.pull_request) === null || _c === void 0 ? void 0 : _c.html_url;
-    const requestedSlackUserId = slackIds[0];
-    const requestUsername = (_d = payload.sender) === null || _d === void 0 ? void 0 : _d.login;
-    const message = `<@${requestedSlackUserId}> has been requested to review <${url}|${title}> by ${requestUsername}.`;
-    const { slackWebhookUrl, iconUrl, botName } = allInputs;
-    await slackClient.postToSlack(slackWebhookUrl, message, { iconUrl, botName });
-};
-exports.execNormalMention = async (payload, allInputs, githubClient, slackClient) => {
-    const info = github_1.pickupInfoFromGithubPayload(payload);
-    const githubUsernames = github_1.pickupUsername(info.body);
-    if (githubUsernames.length === 0) {
-        return;
-    }
-    const slackIds = await exports.convertToSlackUsername(githubUsernames, githubClient);
-    const message = slack_1.buildSlackPostMessage(slackIds, info.title, info.url, info.body, info.senderName);
-    const { slackWebhookUrl, iconUrl, botName } = allInputs;
-    await slackClient.postToSlack(slackWebhookUrl, message, { iconUrl, botName });
-};
-const getAllInputs = () => {
-    const slackWebhookUrl = core.getInput("slack-webhook-url", {
-        required: true
-    });
-    if (!slackWebhookUrl) {
-        core.setFailed("Error! Need to set `slack-webhook-url`.");
-    }
-    const iconUrl = core.getInput("icon-url", { required: false });
-    const botName = core.getInput("bot-name", { required: false });
-    return {
-        slackWebhookUrl,
-        iconUrl,
-        botName
-    };
-};
-const main = async () => {
-    console.log(`Running mention-to-slack version ${version}`);
-    const { payload } = github.context;
-    try {
-        const allInputs = getAllInputs();
-        if (payload.action === "review_requested") {
-            await exports.execPrReviewRequestedMention(payload, allInputs, github_1.GithubRepositoryImpl, slack_1.SlackRepositoryImpl);
-            return;
-        }
-        await exports.execNormalMention(payload, allInputs, github_1.GithubRepositoryImpl, slack_1.SlackRepositoryImpl);
-    }
-    catch (error) {
-        console.error(error);
-        core.setFailed(error.message);
-    }
-};
-main();
+const main_1 = __webpack_require__(131);
+main_1.main();
 
 
 /***/ }),
@@ -8626,7 +8656,7 @@ exports.FetchError = FetchError;
 /***/ 457:
 /***/ (function(module) {
 
-module.exports = {"imalokr":"UN26DL23F","davidgruebl":"UN42FM9DM","franbre":"UN4CRTQ6A","gpinolri":"UU6PBMQ82","343max":"UV2MU4L2V","muratakkas":"UTJ3W2GDD","radoslawadamiakinfinitec":"UMVPZN4Q1","samaronybarros":"UUKQ99GKZ","fr33z3":"UR079B32T","sheueyen":"UN26E66SU","boennemann":"UMQN6QM6X","thulfiqarali":"UULM14YDV","SimonaSchamper":"UN1SD046Q"};
+module.exports = {"imalokr":"UN26DL23F","davidgruebl":"UN42FM9DM","franbre":"UN4CRTQ6A","gpinolri":"UU6PBMQ82","343max":"UV2MU4L2V","radoslawadamiakinfinitec":"UMVPZN4Q1","fr33z3":"UR079B32T","sheueyen":"UN26E66SU","boennemann":"UMQN6QM6X","thulfiqarali":"UULM14YDV","SimonaSchamper":"UN1SD046Q","maria-mart":"U01448BL203","btrigueiro":"U016GBWH820"};
 
 /***/ }),
 
@@ -10181,65 +10211,93 @@ function hasPreviousPage (link) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const uniq = (arr) => [...new Set(arr)];
 exports.pickupUsername = (text) => {
     const pattern = /\B@[a-z0-9_-]+/gi;
     const hits = text.match(pattern);
     if (hits === null) {
         return [];
     }
-    return hits.map(username => username.replace("@", ""));
+    return uniq(hits).map((username) => username.replace("@", ""));
+};
+const acceptActionTypes = {
+    issues: ["opened", "edited"],
+    issue_comment: ["created", "edited"],
+    pull_request: ["opened", "edited", "review_requested"],
+    pull_request_review: ["submitted"],
+    pull_request_review_comment: ["created", "edited"],
+};
+const buildError = (payload) => {
+    return new Error(`unknown event hook: ${JSON.stringify(payload, undefined, 2)}`);
 };
 exports.pickupInfoFromGithubPayload = (payload) => {
     var _a, _b, _c, _d, _e, _f;
-    if (payload.action === "opened" && payload.issue) {
-        return {
-            body: payload.issue.body || "",
-            title: payload.issue.title,
-            url: payload.issue.html_url || "",
-            senderName: ((_a = payload.sender) === null || _a === void 0 ? void 0 : _a.login) || ""
-        };
+    const { action } = payload;
+    if (action === undefined) {
+        throw buildError(payload);
     }
-    if (payload.action === "opened" && payload.pull_request) {
-        return {
-            body: payload.pull_request.body || "",
-            title: payload.pull_request.title,
-            url: payload.pull_request.html_url || "",
-            senderName: ((_b = payload.sender) === null || _b === void 0 ? void 0 : _b.login) || ""
-        };
-    }
-    if (payload.action === "created" && payload.comment) {
-        if (payload.issue) {
+    if (payload.issue) {
+        if (payload.comment) {
+            if (!acceptActionTypes.issue_comment.includes(action)) {
+                throw buildError(payload);
+            }
             return {
                 body: payload.comment.body,
                 title: payload.issue.title,
                 url: payload.comment.html_url,
-                senderName: ((_c = payload.sender) === null || _c === void 0 ? void 0 : _c.login) || ""
+                senderName: ((_a = payload.sender) === null || _a === void 0 ? void 0 : _a.login) || "",
             };
         }
-        if (payload.pull_request) {
+        if (!acceptActionTypes.issues.includes(action)) {
+            throw buildError(payload);
+        }
+        return {
+            body: payload.issue.body || "",
+            title: payload.issue.title,
+            url: payload.issue.html_url || "",
+            senderName: ((_b = payload.sender) === null || _b === void 0 ? void 0 : _b.login) || "",
+        };
+    }
+    if (payload.pull_request) {
+        if (payload.review) {
+            if (!acceptActionTypes.pull_request_review.includes(action)) {
+                throw buildError(payload);
+            }
+            return {
+                body: payload.review.body,
+                title: ((_c = payload.pull_request) === null || _c === void 0 ? void 0 : _c.title) || "",
+                url: payload.review.html_url,
+                senderName: ((_d = payload.sender) === null || _d === void 0 ? void 0 : _d.login) || "",
+            };
+        }
+        if (payload.comment) {
+            if (!acceptActionTypes.issue_comment.includes(action)) {
+                throw buildError(payload);
+            }
             return {
                 body: payload.comment.body,
                 title: payload.pull_request.title,
                 url: payload.comment.html_url,
-                senderName: ((_d = payload.sender) === null || _d === void 0 ? void 0 : _d.login) || ""
+                senderName: ((_e = payload.sender) === null || _e === void 0 ? void 0 : _e.login) || "",
             };
         }
-    }
-    if (payload.action === "submitted" && payload.review) {
+        if (!acceptActionTypes.pull_request.includes(action)) {
+            throw buildError(payload);
+        }
         return {
-            body: payload.review.body,
-            title: ((_e = payload.pull_request) === null || _e === void 0 ? void 0 : _e.title) || "",
-            url: payload.review.html_url,
-            senderName: ((_f = payload.sender) === null || _f === void 0 ? void 0 : _f.login) || ""
+            body: payload.pull_request.body || "",
+            title: payload.pull_request.title,
+            url: payload.pull_request.html_url || "",
+            senderName: ((_f = payload.sender) === null || _f === void 0 ? void 0 : _f.login) || "",
         };
     }
-    throw new Error(`unknown event hook: ${JSON.stringify(payload, undefined, 2)}`);
+    throw buildError(payload);
 };
 exports.GithubRepositoryImpl = {
     loadNameMappingConfig: () => {
         const configObject = __webpack_require__(457);
         return configObject;
-    }
+    },
 };
 
 
@@ -11244,7 +11302,7 @@ module.exports = function bind(fn, thisArg) {
 /***/ 731:
 /***/ (function(module) {
 
-module.exports = {"name":"actions-digibank-mention-to-slack","description":"","version":"3.0.2","author":"","dependencies":{"@actions/core":"^1.2.3","@actions/github":"^2.1.1","axios":"^0.19.2"},"devDependencies":{"@types/jest":"^25.1.4","@types/js-yaml":"^3.12.2","@zeit/ncc":"^0.22.0","jest":"^25.2.3","ts-jest":"^25.2.1","ts-node":"^8.8.1","typescript":"^3.8.3"},"homepage":"https://github.com/infinitecsolutions/actions-digibank-mention-to-slack#readme","license":"ISC","main":"src/index.ts","repository":{"type":"git","url":"git+https://github.com/infinitecsolutions/actions-digibank-mention-to-slack.git"},"scripts":{"build":"ncc build","preversion":"npm run -s build && git add dist","test":"jest"}};
+module.exports = {"name":"actions-digibank-mention-to-slack","description":"","version":"3.0.3","author":"","dependencies":{"@actions/core":"^1.2.3","@actions/github":"^2.1.1","axios":"^0.19.2"},"devDependencies":{"@types/jest":"^25.1.4","@types/js-yaml":"^3.12.2","@zeit/ncc":"^0.22.0","jest":"^25.2.3","ts-jest":"^25.2.1","ts-node":"^8.8.1","typescript":"^3.8.3"},"homepage":"https://github.com/infinitecsolutions/actions-digibank-mention-to-slack#readme","license":"ISC","main":"src/index.ts","repository":{"type":"git","url":"git+https://github.com/infinitecsolutions/actions-digibank-mention-to-slack.git"},"scripts":{"build":"ncc build","preversion":"npm run -s build && git add dist","test":"jest"}};
 
 /***/ }),
 
@@ -28708,17 +28766,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(__webpack_require__(53));
 exports.buildSlackPostMessage = (slackIdsForMention, issueTitle, commentLink, githubBody, senderName) => {
-    const mentionBlock = slackIdsForMention.map(id => `<@${id}>`).join(" ");
+    const mentionBlock = slackIdsForMention.map((id) => `<@${id}>`).join(" ");
     const body = githubBody
         .split("\n")
-        .map(line => `> ${line}`)
+        .map((line) => `> ${line}`)
         .join("\n");
+    const message = [
+        mentionBlock,
+        `${slackIdsForMention.length === 1 ? "has" : "have"}`,
+        `been mentioned at <${commentLink}|${issueTitle}> by ${senderName}`,
+    ].join(" ");
+    return `${message}\n${body}`;
+};
+const openIssueLink = "https://github.com/abeyuya/actions-mention-to-slack/issues/new";
+exports.buildSlackErrorMessage = (error, currentJobUrl) => {
+    const jobTitle = "mention-to-slack action";
+    const jobLinkMessage = currentJobUrl
+        ? `<${currentJobUrl}|${jobTitle}>`
+        : jobTitle;
     return [
-        `${mentionBlock} mentioned at <${commentLink}|${issueTitle}> by ${senderName}`,
-        body
+        `❗ An internal error occurred in ${jobLinkMessage}`,
+        "(but action didn't fail as this action is not critical).",
+        `To solve the problem, please copy and paste the text below and <${openIssueLink}|open an issue>`,
+        "",
+        "```",
+        error.stack || error.message,
+        "```",
     ].join("\n");
 };
 const defaultBotName = "Github Mention";
+const defaultIconEmoji = ":bell:";
 exports.SlackRepositoryImpl = {
     postToSlack: async (webhookUrl, message, options) => {
         const botName = (() => {
@@ -28731,19 +28808,19 @@ exports.SlackRepositoryImpl = {
         const slackPostParam = {
             text: message,
             link_names: 0,
-            username: botName
+            username: botName,
         };
         const u = options === null || options === void 0 ? void 0 : options.iconUrl;
         if (u && u !== "") {
             slackPostParam.icon_url = u;
         }
         else {
-            slackPostParam.icon_emoji = ":bell:";
+            slackPostParam.icon_emoji = defaultIconEmoji;
         }
         await axios_1.default.post(webhookUrl, JSON.stringify(slackPostParam), {
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json" },
         });
-    }
+    },
 };
 
 

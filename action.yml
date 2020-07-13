@@ -2,7 +2,7 @@ name: "Github mention to Slack"
 description: "Convert Github mention to Slack mention"
 inputs:
   slack-webhook-url:
-    description: "Slack Incomming Webhook URL to notify."
+    description: "Slack Incoming Webhook URL to notify."
     required: true
   bot-name:
     description: "Display name for this bot on Slack."
