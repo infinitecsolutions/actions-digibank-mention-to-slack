@@ -1,7 +1,7 @@
 {
 	"name": "actions-digibank-mention-to-slack",
 	"description": "",
-	"version": "3.0.5",
+	"version": "3.0.6",
 	"author": "",
 	"dependencies": {
 		"@actions/core": "^1.2.3",

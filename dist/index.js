@@ -11302,7 +11302,7 @@ module.exports = function bind(fn, thisArg) {
 /***/ 731:
 /***/ (function(module) {
 
-module.exports = {"name":"actions-digibank-mention-to-slack","description":"","version":"3.0.3","author":"","dependencies":{"@actions/core":"^1.2.3","@actions/github":"^2.1.1","axios":"^0.19.2"},"devDependencies":{"@types/jest":"^25.1.4","@types/js-yaml":"^3.12.2","@zeit/ncc":"^0.22.0","jest":"^25.2.3","ts-jest":"^25.2.1","ts-node":"^8.8.1","typescript":"^3.8.3"},"homepage":"https://github.com/infinitecsolutions/actions-digibank-mention-to-slack#readme","license":"ISC","main":"src/index.ts","repository":{"type":"git","url":"git+https://github.com/infinitecsolutions/actions-digibank-mention-to-slack.git"},"scripts":{"build":"ncc build","preversion":"npm run -s build && git add dist","test":"jest"}};
+module.exports = {"name":"actions-digibank-mention-to-slack","description":"","version":"3.0.5","author":"","dependencies":{"@actions/core":"^1.2.3","@actions/github":"^2.1.1","axios":"^0.19.2"},"devDependencies":{"@types/jest":"^25.1.4","@types/js-yaml":"^3.12.2","@zeit/ncc":"^0.22.0","jest":"^25.2.3","ts-jest":"^25.2.1","ts-node":"^8.8.1","typescript":"^3.8.3"},"homepage":"https://github.com/infinitecsolutions/actions-digibank-mention-to-slack#readme","license":"ISC","main":"src/index.ts","repository":{"type":"git","url":"git+https://github.com/infinitecsolutions/actions-digibank-mention-to-slack.git"},"scripts":{"build":"ncc build","preversion":"npm run -s build && git add dist","test":"jest"}};
 
 /***/ }),
 
