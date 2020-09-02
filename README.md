@@ -34,6 +34,8 @@ Send a PR for `user-mapping.json`
 }
 ```
 
+Get the user id by right-clicking their name in their profile and selecting "Copy Link".
+
 ## Development
 
 ### build dist/index.js
