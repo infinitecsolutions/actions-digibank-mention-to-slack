@@ -8,10 +8,11 @@ export const buildSlackPostMessage = (
 	senderName: string
 ) => {
 	const mentionBlock = slackIdsForMention.map((id) => `<@${id}>`).join(" ");
-	const body = githubBody
+	let body = githubBody
 		.split("\n")
 		.map((line) => `> ${line}`)
-		.join("\n");
+		.join("\n")
+		.replace(/<!--[\s\S]*?-->/g, ""); // Remove HTML/Markdown comments from message
 
 	const message = [
 		mentionBlock,
