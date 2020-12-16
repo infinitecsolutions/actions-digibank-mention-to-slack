@@ -19,6 +19,29 @@ describe("modules/slack", () => {
       expect(result.includes("by sender_github_username")).toEqual(true);
       expect(result.includes("> message")).toEqual(true);
     });
+
+    it("should remove comments from message", () => {
+      const result = buildSlackPostMessage(
+        ["slackUser1"],
+        "title",
+        "link",
+        `message
+        <!--
+
+
+        with comment
+
+
+        /-->`,
+        "sender_github_username"
+      );
+
+      expect(result.includes("<@slackUser1> has been mentioned")).toEqual(true);
+      expect(result.includes("<link|title>")).toEqual(true);
+      expect(result.includes("by sender_github_username")).toEqual(true);
+      expect(result.includes("> message")).toEqual(true);
+      expect(result.includes("with comment")).toEqual(false);
+    });
   });
 
   describe("buildSlackErrorMessage", () => {
